@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Orders Dashboard - Organic Marketplace</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f4f6f8; color: #333; padding: 1.5rem; }
+        .container { max-width: 800px; margin: auto; }
+        h2 { color: #2e7d32; margin-bottom: 1rem; text-align: center; }
+        .order-card { background: white; padding: 1.5rem; margin-bottom: 1.2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 5px solid #2e7d32; }
+        .order-card h3 { color: #1b5e20; margin-bottom: 0.5rem; display: flex; justify-content: space-between; }
+        .order-card p { margin-bottom: 0.4rem; color: #555; font-size: 0.95rem; }
+        .badge { background: #e8f5e9; color: #2e7d32; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.85rem; font-weight: bold; }
+        .btn-group { display: flex; gap: 0.5rem; margin-top: 1rem; }
+        .btn { background: #2e7d32; color: white; padding: 0.6rem 1.2rem; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; text-decoration: none; flex: 1; text-align: center; }
+        .btn-nav { background: #0275d8; }
+        .btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>🚚 Driver Order Dispatch Portal</h2>
+
+        {% for order in orders %}
+            <div class="order-card">
+                <h3>
+                    <span>Order #{{ order.id }} - {{ order.customer_name }}</span>
+                    <span class="badge">{{ order.status }}</span>
+                </h3>
+                <p><strong>📞 Phone:</strong> <a href="tel:{{ order.phone }}" style="color: #0275d8; font-weight: bold;">{{ order.phone }}</a></p>
+                <p><strong>📍 Address:</strong> {{ order.address }}</p>
+                <p><strong>🛒 Items:</strong> {{ order.order_items }}</p>
+                <p><strong>💰 Total Amount:</strong> ₹{{ order.total_amount }} ({{ order.payment_method }})</p>
+
+                <div class="btn-group">
+                    <button class="btn" onclick="acceptOrder({{ order.id }})">🚀 Pick Up & Start Delivery</button>
+                    <a class="btn btn-nav" href="https://www.google.com/maps/search/?api=1&query={{ order.address|urlencode }}" target="_blank">🗺️ Google Maps Navigation</a>
+                </div>
+            </div>
+        {% empty %}
+            <p style="text-align: center; color: #666; margin-top: 3rem;">No active orders pending pick up.</p>
+        {% endfor %}
+    </div>
+
+    <script>
+        async function acceptOrder(orderId) {
+            const response = await fetch(`/api/accept-order/${orderId}/`, { method: 'POST' });
+            const data = await response.json();
+            if (data.success) {
+                window.location.href = data.redirect_url;
+            } else {
+                alert("Failed to accept order: " + data.error);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Login - Organic Market</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f8f9fa; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .card { background: white; padding: 2.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 380px; }
+        .card h2 { margin-bottom: 1.5rem; color: #2e7d32; text-align: center; }
+        
+        .error-alert { background-color: #ffebee; color: #c62828; border: 1px solid #ef9a9a; padding: 0.75rem; border-radius: 4px; margin-bottom: 1.25rem; font-size: 0.88rem; }
+        
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; margin-bottom: 0.4rem; font-weight: 600; color: #333; }
+        .form-group input { width: 100%; padding: 0.65rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
+
+        .password-wrapper { position: relative; display: flex; align-items: center; }
+        .password-wrapper input { padding-right: 42px; }
+        .toggle-eye { position: absolute; right: 10px; background: none; border: none; cursor: pointer; font-size: 1.2rem; color: #666; }
+        
+        .btn { background: #2e7d32; color: white; border: none; padding: 0.75rem; width: 100%; cursor: pointer; border-radius: 4px; font-size: 1rem; font-weight: bold; margin-top: 0.5rem; }
+        .btn:hover { background: #1b5e20; }
+        .link { display: block; text-align: center; margin-top: 1rem; color: #2e7d32; text-decoration: none; font-size: 0.9rem; }
+        .link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>🌱 Customer Login</h2>
+
+        {% if form.errors %}
+            <div class="error-alert">Invalid username or password. Please try again.</div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_username">Username</label>
+                <input type="text" name="username" id="id_username" required autofocus placeholder="Enter username">
+            </div>
+
+            <div class="form-group">
+                <label for="id_password">Password</label>
+                <div class="password-wrapper">
+                    <input type="password" name="password" id="id_password" required placeholder="Enter password">
+                    <button type="button" class="toggle-eye" onclick="togglePassword()">👁️</button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn">Log In</button>
+        </form>
+
+        <a href="{% url 'register' %}" class="link">Don't have an account? Sign Up</a>
+        <a href="{% url 'home' %}" class="link">← Back to Home</a>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const pwd = document.getElementById('id_password');
+            const btn = document.querySelector('.toggle-eye');
+            if (pwd.type === 'password') {
+                pwd.type = 'text';
+                btn.textContent = '🙈';
+            } else {
+                pwd.type = 'password';
+                btn.textContent = '👁️';
+            }
+        }
+    </script>
+
+</body>
+</html>

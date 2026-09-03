@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Active Delivery - Order #{{ order.id }}</title>
+    
+    <!-- Leaflet OpenStreetMap CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; text-align: center; padding: 1.5rem; background: #e8f5e9; color: #1b5e20; }
+        .card { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
+        .status-box { font-size: 1.1rem; font-weight: bold; color: #2e7d32; margin: 0.8rem 0; }
+        .coords { font-size: 0.9rem; color: #555; background: #f1f8e9; padding: 0.5rem; border-radius: 6px; margin-bottom: 1rem; }
+        #driver-map { width: 100%; height: 280px; border-radius: 8px; margin: 1rem 0; border: 1px solid #ccc; }
+        .btn-gmaps { background: #4285F4; color: white; padding: 0.8rem 1.2rem; border-radius: 6px; text-decoration: none; font-weight: bold; display: block; margin-top: 1rem; }
+        .btn-group { display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: center; margin-top: 0.8rem; }
+        .btn { background: #2e7d32; color: white; border: none; padding: 0.5rem 0.8rem; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>🚚 Active Delivery (#{{ order.id }})</h2>
+        <p><strong>Customer:</strong> {{ order.customer_name }} | <a href="tel:{{ order.phone }}" style="color: #0275d8;">📞 Call Customer</a></p>
+        <p style="margin-top: 0.3rem;"><strong>Address:</strong> {{ order.address }}</p>
+
+        <div id="driver-map"></div>
+
+        <div class="status-box" id="status-display">📡 Transmitting Location...</div>
+        <div class="coords" id="coords-display">Lat: -- | Lng: --</div>
+
+        <a class="btn-gmaps" href="https://www.google.com/maps/dir/?api=1&destination={{ order.address|urlencode }}" target="_blank">
+            🗺️ Open Turn-by-Turn Google Maps Navigation
+        </a>
+
+        <hr style="margin: 1rem 0; border: 0; border-top: 1px solid #ddd;">
+        <p style="font-size: 0.8rem; color: #666; margin-bottom: 0.4rem;">Manual Location Simulator (For Testing):</p>
+        <div class="btn-group">
+            <button class="btn" onclick="sendSimulatedLocation(13.5501, 78.5026)">📍 Madanapalle</button>
+            <button class="btn" onclick="sendSimulatedLocation(13.6472, 78.4728)">📍 Kurabala Kota</button>
+            <button class="btn" onclick="sendSimulatedLocation(12.9716, 77.5946)">📍 Bengaluru</button>
+        </div>
+    </div>
+
+    <!-- Leaflet OpenStreetMap JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        const orderId = {{ order.id }};
+        const destLat = {{ order.dest_latitude|default:"13.5501" }};
+        const destLng = {{ order.dest_longitude|default:"78.5026" }};
+
+        let map = L.map('driver-map').setView([destLat, destLng], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        L.marker([destLat, destLng]).addTo(map).bindPopup("<b>Customer Address</b><br>{{ order.address }}").openPopup();
+        let driverMarker = null;
+
+        function sendCoordsToBackend(lat, lng) {
+            document.getElementById('coords-display').textContent = `Lat: ${lat.toFixed(5)} | Lng: ${lng.toFixed(5)}`;
+            
+            fetch('/api/update-driver-location/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    order_id: orderId,
+                    latitude: lat,
+                    longitude: lng
+                })
+            });
+
+            const truckIcon = L.icon({
+                iconUrl: 'https://cdn-icons-png.flaticon.com/512/3063/3063822.png',
+                iconSize: [35, 35],
+                iconAnchor: [17, 17]
+            });
+
+            if (driverMarker) {
+                driverMarker.setLatLng([lat, lng]);
+            } else {
+                driverMarker = L.marker([lat, lng], { icon: truckIcon }).addTo(map);
+            }
+        }
+
+        function sendSimulatedLocation(lat, lng) {
+            document.getElementById('status-display').textContent = '🟢 Simulated Location Transmitted!';
+            sendCoordsToBackend(lat, lng);
+        }
+
+        function startGpsTracking() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.watchPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        document.getElementById('status-display').textContent = '🟢 Transmitting Live Phone GPS...';
+                        sendCoordsToBackend(lat, lng);
+                    },
+                    (error) => {
+                        document.getElementById('status-display').textContent = '⚠️ GPS Access Blocked. Use manual buttons below:';
+                    },
+                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                );
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', startGpsTracking);
+    </script>
+</body>
+</html>

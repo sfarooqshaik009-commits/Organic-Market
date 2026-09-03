@@ -1,0 +1,329 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organic Farming Marketplace</title>
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f8f9fa; color: #333; line-height: 1.6; min-height: 100vh; }
+
+        /* Navbar Header */
+        .navbar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background-color: #2e7d32; 
+            color: white; 
+            padding: 1rem 2rem; 
+            position: sticky; 
+            top: 0; 
+            z-index: 1000; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15); 
+            width: 100%;
+        }
+        .logo { font-size: 1.5rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; }
+        
+        nav { display: flex; align-items: center; gap: 0.75rem; }
+        nav form { display: inline-flex; margin: 0; padding: 0; }
+        
+        .nav-btn { 
+            background: transparent; 
+            border: 1px solid white; 
+            color: white; 
+            padding: 0.5rem 1rem; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 0.95rem; 
+            text-decoration: none; 
+            display: inline-block; 
+            transition: all 0.2s ease; 
+        }
+        .nav-btn:hover { background-color: white; color: #2e7d32; }
+        .logout-btn { background-color: #d32f2f; border-color: #d32f2f; }
+        .logout-btn:hover { background-color: #b71c1c; color: white; }
+        .user-greeting { color: #fbc02d; font-weight: bold; font-size: 0.95rem; }
+
+        /* Hero Banner */
+        .hero { 
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat; 
+            color: white; 
+            text-align: center; 
+            padding: 4rem 1rem; 
+        }
+        .hero h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+
+        /* Main Container & Product Grid */
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .section-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 1.5rem; 
+            border-bottom: 2px solid #2e7d32; 
+            padding-bottom: 0.5rem; 
+            gap: 1rem;
+        }
+        #section-title { color: #2e7d32; font-size: 1.8rem; margin: 0; white-space: nowrap; }
+        
+        .cart-btn { 
+            background-color: #fbc02d; 
+            color: #333; 
+            border: none; 
+            padding: 0.6rem 1.2rem; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 1rem; 
+            font-weight: bold; 
+            transition: 0.2s; 
+            white-space: nowrap;
+        }
+        .cart-btn:hover { background-color: #fdd835; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.5rem; }
+        .card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.08); display: flex; flex-direction: column; justify-content: space-between; }
+        .card-img { width: 100%; height: 180px; object-fit: cover; }
+        .card-body { padding: 1rem; display: flex; flex-direction: column; flex-grow: 1; justify-content: space-between; }
+        .card-title { font-size: 1.1rem; margin-bottom: 0.25rem; color: #1b5e20; }
+        
+        /* Star Rating Styles */
+        .rating-badge { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; margin-bottom: 0.6rem; cursor: pointer; }
+        .stars { color: #fbc02d; font-weight: bold; }
+        .review-count { color: #0275d8; font-size: 0.8rem; text-decoration: underline; }
+
+        .card-desc { font-size: 0.85rem; color: #666; margin-bottom: 1rem; }
+        .card-footer { display: flex; justify-content: space-between; align-items: center; }
+        .price { font-size: 1.2rem; font-weight: bold; color: #2e7d32; }
+        .btn { background-color: #2e7d32; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-weight: 600; }
+        .btn-success { background-color: #388e3c; color: white; border: none; border-radius: 4px; cursor: pointer; }
+
+        /* Cart Sidebar Drawer */
+        .cart-sidebar { position: fixed; top: 0; right: -400px; width: 380px; max-width: 100%; height: 100%; background: white; box-shadow: -2px 0 5px rgba(0,0,0,0.2); transition: right 0.3s ease-in-out; z-index: 1001; display: flex; flex-direction: column; }
+        .cart-sidebar.active { right: 0; }
+        .cart-header { padding: 1rem; background: #2e7d32; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .close-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+        .cart-items { flex-grow: 1; padding: 1rem; overflow-y: auto; }
+        .cart-item { display: flex; gap: 1rem; margin-bottom: 1rem; border-bottom: 1px solid #eee; padding-bottom: 0.75rem; align-items: center; }
+        .cart-item img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; }
+        .qty-controls button { width: 24px; height: 24px; cursor: pointer; }
+        .cart-footer { padding: 1rem; border-top: 1px solid #eee; background: #f9f9f9; }
+        .subtotal { display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: bold; margin-bottom: 1rem; }
+        .cart-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 1000; }
+        .cart-overlay.active { display: block; }
+
+        /* Modals & Reviews */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1002; justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 2rem; border-radius: 8px; width: 90%; max-width: 500px; position: relative; max-height: 90vh; overflow-y: auto; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.25rem; font-weight: bold; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; }
+
+        /* Star Selector */
+        .star-rating-select { display: flex; gap: 0.5rem; font-size: 1.5rem; cursor: pointer; color: #ccc; margin-bottom: 1rem; }
+        .star-rating-select .selected, .star-rating-select .hovered { color: #fbc02d; }
+        .review-card { background: #f9f9f9; padding: 0.8rem; border-radius: 6px; margin-bottom: 0.8rem; border-left: 3px solid #2e7d32; }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="navbar">
+        <div class="logo" onclick="showHome()">🌱 OrganicMarket</div>
+        <nav>
+            <button class="nav-btn" onclick="showHome()">Home</button>
+            <button class="nav-btn" onclick="filterCategory('vegetables')">Vegetables</button>
+            <button class="nav-btn" onclick="filterCategory('fruits')">Fruits</button>
+            <button class="nav-btn" onclick="filterCategory('fertilizers')">Fertilizers</button>
+
+            {% if user.is_authenticated %}
+                <a href="{% url 'my_orders' %}" class="nav-btn">📦 My Orders</a>
+                <span class="user-greeting">👋 Hi, {{ user.username|title }}</span>
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="nav-btn logout-btn">Logout</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" class="nav-btn">Log In</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <!-- Hero Banner -->
+    <section id="hero-banner" class="hero">
+        <h1>100% Certified Organic Products</h1>
+        <p>Directly from local farms to your doorstep with zero synthetic chemicals.</p>
+    </section>
+
+    <!-- Main Store Section -->
+    <main class="container">
+        <div class="section-header">
+            <h2 id="section-title">All Organic Products</h2>
+
+            <!-- Live Search Bar -->
+            <div style="flex-grow: 1; max-width: 350px;">
+                <input 
+                    type="text" 
+                    id="search-input" 
+                    oninput="handleSearchInput(event)" 
+                    placeholder="🔍 Search products (e.g., Apple, Spinach)..." 
+                    style="width: 100%; padding: 0.5rem 1rem; border: 1.5px solid #2e7d32; border-radius: 20px; outline: none; font-size: 0.95rem;"
+                >
+            </div>
+
+            <button class="cart-btn" onclick="toggleCart()">
+                🛒 Cart (<span id="cart-count">0</span>)
+            </button>
+        </div>
+
+        <div id="product-grid" class="grid"></div>
+    </main>
+
+    <!-- Product Reviews & Rating Modal -->
+    <div id="reviews-modal" class="modal">
+        <div class="modal-content" style="max-width: 550px;">
+            <span class="close-btn" onclick="closeReviewsModal()" style="color: #333; position: absolute; right: 1rem; top: 1rem;">&times;</span>
+            <h2 id="modal-product-name" style="color: #2e7d32; margin-bottom: 0.2rem;">Product Reviews</h2>
+            <p id="modal-avg-rating" style="font-size: 0.95rem; color: #555; margin-bottom: 1rem;"></p>
+
+            <!-- Submit Review Form -->
+            <form id="review-form" onsubmit="submitReviewForm(event)" style="background: #e8f5e9; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                <h4 style="color: #1b5e20; margin-bottom: 0.5rem;">Write a Review</h4>
+                <div class="form-group">
+                    <label style="font-size: 0.85rem;">Your Name / City</label>
+                    <input type="text" id="rev-name" placeholder="e.g. Farooq (Madanapalle)" required>
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 0.85rem;">Your Rating</label>
+                    <div class="star-rating-select" id="star-selector">
+                        <span onclick="setRating(1)">★</span>
+                        <span onclick="setRating(2)">★</span>
+                        <span onclick="setRating(3)">★</span>
+                        <span onclick="setRating(4)">★</span>
+                        <span onclick="setRating(5)">★</span>
+                    </div>
+                    <input type="hidden" id="rev-rating" value="5">
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 0.85rem;">Your Review / Experience</label>
+                    <textarea id="rev-comment" rows="2" placeholder="How fresh was the produce?" required></textarea>
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">⭐ Post Review</button>
+            </form>
+
+            <h4 style="color: #2e7d32; margin-bottom: 0.8rem;">Customer Feedback</h4>
+            <div id="reviews-list-container"></div>
+        </div>
+    </div>
+
+    <!-- Cart Sidebar Drawer -->
+    <div id="cart-sidebar" class="cart-sidebar">
+        <div class="cart-header">
+            <h3>Your Shopping Cart</h3>
+            <button class="close-btn" onclick="toggleCart()">&times;</button>
+        </div>
+        <div id="cart-items" class="cart-items">
+            <p class="empty-msg">Your cart is empty.</p>
+        </div>
+        <div class="cart-footer">
+            <div class="subtotal">
+                <span>Total:</span>
+                <span id="cart-total">₹0.00</span>
+            </div>
+            <button id="checkout-btn" class="btn btn-primary" onclick="openBilling()" style="width: 100%; padding: 0.75rem; font-size: 1rem; font-weight: bold;" disabled>Proceed to Billing</button>
+        </div>
+    </div>
+    <div id="cart-overlay" class="cart-overlay" onclick="toggleCart()"></div>
+
+    <!-- Billing / Checkout Modal -->
+    <div id="billing-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeBilling()" style="color: #333; position: absolute; right: 1rem; top: 1rem;">&times;</span>
+            <h2 style="color: #2e7d32; margin-bottom: 1rem;">Order & Payment Details</h2>
+            
+            <div class="order-summary-box" style="background: #f1f8e9; padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
+                <h4 style="color: #2e7d32; margin-bottom: 0.5rem;">Order Summary</h4>
+                <div id="billing-summary-items"></div>
+                <hr style="margin: 0.8rem 0; border: none; border-top: 1px solid #c8e6c9;">
+                <div class="total-row"><strong>Grand Total: <span id="billing-total" style="color: #2e7d32; font-size: 1.2rem;">₹0.00</span></strong></div>
+            </div>
+
+            <form id="billing-form" onsubmit="processOrder(event)">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="cust-name" required placeholder="Enter full name">
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="cust-phone" required placeholder="Enter 10-digit mobile number">
+                </div>
+                <div class="form-group">
+                    <label>Delivery Address</label>
+                    <textarea id="cust-address" required rows="2" placeholder="House No, Street, City, Pincode"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Payment Method</label>
+                    <select id="cust-payment" onchange="handlePaymentMethodChange()">
+                        <option value="UPI">Pay via UPI (GPay / PhonePe / Paytm)</option>
+                        <option value="Card">Credit / Debit Card</option>
+                        <option value="COD">Cash on Delivery (COD)</option>
+                    </select>
+                </div>
+
+                <!-- Dynamic UPI Payment Box -->
+                <div id="upi-payment-box" style="border: 2px dashed #2e7d32; padding: 1rem; border-radius: 8px; text-align: center; margin-bottom: 1rem; background: #fff;">
+                    <p style="font-weight: bold; color: #2e7d32; margin-bottom: 0.5rem;">Scan QR Code to Pay Exact Amount</p>
+                    <img id="upi-qr-code" src="" alt="UPI QR Code" style="width: 180px; height: 180px; margin: 0.5rem auto; display: block; border: 1px solid #ddd; padding: 5px; border-radius: 4px;">
+                    <p style="font-size: 0.85rem; color: #555;">UPI ID: <strong id="store-upi-id" style="color: #2e7d32;">6302189220@axl</strong></p>
+                    
+                    <div style="margin-top: 0.8rem; text-align: left;">
+                        <label style="font-size: 0.85rem; font-weight: bold;">Enter UPI Transaction / UTR Ref No.*</label>
+                        <input type="text" id="upi-utr" placeholder="12-digit UTR No. (e.g., 423456789012)" style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; margin-top: 0.3rem;">
+                    </div>
+                </div>
+
+                <!-- Card Payment Box -->
+                <div id="card-payment-box" style="display: none; border: 1px solid #ccc; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; background: #fafafa;">
+                    <div class="form-group">
+                        <label>Card Number</label>
+                        <input type="text" id="card-num" placeholder="4532 •••• •••• 8892" maxlength="19">
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Expiry Date</label>
+                            <input type="text" id="card-exp" placeholder="MM/YY">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>CVV</label>
+                            <input type="password" id="card-cvv" placeholder="•••" maxlength="4">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+                    <button type="button" class="btn" onclick="cancelPayment()" style="flex: 1; background-color: #757575; color: white; padding: 0.75rem; font-size: 1rem; font-weight: bold;">
+                        ❌ Cancel Payment
+                    </button>
+                    <button type="submit" id="place-order-submit-btn" class="btn btn-success" style="flex: 2; padding: 0.75rem; font-size: 1rem; font-weight: bold;">
+                        ✅ Confirm & Pay
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Django JSON Data Bridge -->
+    {{ db_products|json_script:"django-products-data" }}
+
+    <!-- App Script -->
+    <script src="{% static 'js/app.js' %}?v=10.0"></script>
+</body>
+</html>
+
+
+
+
+

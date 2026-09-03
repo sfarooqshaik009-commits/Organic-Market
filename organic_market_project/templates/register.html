@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Registration - Organic Market</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f8f9fa; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 1rem; }
+        .card { background: white; padding: 2.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        .card h2 { margin-bottom: 1.5rem; color: #2e7d32; text-align: center; }
+        
+        .form-group { margin-bottom: 1rem; }
+        .form-group p { margin-bottom: 0.8rem; }
+        .form-group label { display: block; margin-bottom: 0.3rem; font-weight: 600; color: #333; }
+        .form-group input { width: 100%; padding: 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem; }
+        .helptext { display: block; font-size: 0.75rem; color: #666; margin-top: 0.2rem; }
+        .errorlist { color: #c62828; font-size: 0.85rem; list-style: none; margin-bottom: 0.5rem; }
+
+        .btn { background: #2e7d32; color: white; border: none; padding: 0.75rem; width: 100%; cursor: pointer; border-radius: 4px; font-size: 1rem; font-weight: bold; margin-top: 1rem; }
+        .btn:hover { background: #1b5e20; }
+        .link { display: block; text-align: center; margin-top: 1.2rem; color: #2e7d32; text-decoration: none; font-size: 0.9rem; }
+        .link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>🌱 Customer Sign Up</h2>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                {{ form.as_p }}
+            </div>
+            <button type="submit" class="btn">Register Account</button>
+        </form>
+
+        <a href="{% url 'login' %}" class="link">Already have an account? Log In</a>
+        <a href="{% url 'home' %}" class="link">← Back to Home</a>
+    </div>
+
+</body>
+</html>
